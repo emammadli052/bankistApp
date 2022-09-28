@@ -88,17 +88,26 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // FUNCTIONS
-const displayMovements = (movements, sort) => {
+const displayMovements = (acc, sort) => {
   containerMovements.innerHTML = '';
-  const mov = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  const mov = sort
+    ? acc.movements.slice().sort((a, b) => a - b)
+    : acc.movements;
   mov?.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
+    const date = new Date(acc.movementsDates[i]);
+    const now = new Date();
+    const day = date.getDate().toString().padStart(2, 0);
+    const month = (date.getMonth() + 1).toString().padStart(2, 0);
+    const year = date.getFullYear();
+    const displayDate = `${day}/${month}/${year}`;
     const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-          <div class="movements__value">${mov.toFixed(2)}€</div>
+          <div class="movements__date">${displayDate}</div>
+          <div class="movements__value">${mov}€</div>
         </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -119,9 +128,9 @@ const calclDisplaySummary = account => {
       return interest >= 1; // take interests greater than 1
     })
     .reduce((acc, int) => acc + int, 0);
-  labelSumIn.textContent = `${income.toFixed(2)}€`;
-  labelSumOut.textContent = `${Math.abs(out).toFixed(2)}€`;
-  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
+  labelSumIn.textContent = `${income}€`;
+  labelSumOut.textContent = `${Math.abs(out)}€`;
+  labelSumInterest.textContent = `${interest}€`;
 };
 
 const createUserNames = accs => {
@@ -138,12 +147,12 @@ createUserNames(accounts);
 const calcDisplayBalance = acc => {
   const balance = acc.movements.reduce((acc, curr) => acc + curr, 0);
   acc.balance = balance;
-  labelBalance.textContent = `${balance.toFixed(2)} EUR`;
+  labelBalance.textContent = `${balance} EUR`;
 };
 
 const updateUI = acc => {
   // Display Movements
-  displayMovements(acc.movements);
+  displayMovements(acc);
   // Display Balance
   calcDisplayBalance(acc);
   // Display Summary
@@ -166,6 +175,14 @@ btnLogin.addEventListener('click', e => {
     }!`;
     // Display UI
     containerApp.style.opacity = 100;
+    // get current date and time
+    const now = new Date();
+    const day = now.getDate().toString().padStart(2, 0);
+    const month = (now.getMonth() + 1).toString().padStart(2, 0);
+    const year = now.getFullYear();
+    const hour = now.getHours().toString().padStart(2, 0);
+    const mins = now.getMinutes().toString().padStart(2, 0);
+    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${mins}`;
     // Remove keyboard focus
     inputLoginPin.blur();
     // update information
@@ -195,6 +212,8 @@ btnTransfer.addEventListener('click', e => {
     // push new value to movement array
     currentAccount.movements.push(-amount);
     recieverAcc.movements.push(amount);
+    currentAccount.movementsDates.push(new Date().toISOString());
+    recieverAcc.movementsDates.push(new Date().toISOString());
     // update information
     updateUI(currentAccount);
   }
@@ -225,14 +244,16 @@ btnClose.addEventListener('click', e => {
 
 // ReuqestLoan EventHandler
 btnLoan.addEventListener('click', e => {
+  console.log('Loan button clicked');
   e.preventDefault();
-  const amount = Math.floor(inputLoanAmount.value).toFixed(2);
+  const amount = Math.floor(inputLoanAmount.value);
   const isLoanConfirmed = currentAccount.movements.some(
     mov => mov >= amount * 0.1
   );
 
   if (isLoanConfirmed && amount > 0) {
     currentAccount.movements.push(amount);
+    currentAccount.movementsDates.push(new Date().toISOString());
     updateUI(currentAccount);
   }
   inputLoanAmount.value = '';
@@ -242,7 +263,7 @@ btnLoan.addEventListener('click', e => {
 let sorted = false;
 btnSort.addEventListener('click', e => {
   e.preventDefault();
-  displayMovements(currentAccount.movements, !sorted);
+  displayMovements(currentAccount, !sorted);
   sorted = !sorted;
 });
 
@@ -437,3 +458,26 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 // console.log(shallowDogs);
 
 //**********************SECTION_12****************************/
+
+//create date
+// const now = new Date();
+// console.log(now);
+// console.log(new Date('Sep 28 2022 12:31:42'));
+// console.log(new Date('Oct 21, 1995'));
+// console.log(new Date(account1.movementsDates[0]));
+// console.log(new Date(2037, 9));
+
+// console.log(now.getDate());
+// console.log(now.getMonth());
+// console.log(now.getDay());
+// console.log(now.getFullYear());
+// console.log(now.getHours());
+// console.log(now.getMinutes());
+// console.log(now.getSeconds());
+// console.log(now.toISOString());
+// console.log(now.getTime());
+// console.log(new Date(now.getTime()));
+// console.log(new Date(Date.now()));
+
+// console.log(now.toLocaleDateString());
+// console.log(`${now.getHours()}:${now.getMinutes()}`);
