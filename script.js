@@ -17,9 +17,9 @@ const account1 = {
     '2020-01-28T09:15:04.904Z',
     '2020-04-01T10:17:24.185Z',
     '2020-05-08T14:11:59.604Z',
-    '2020-05-27T17:01:17.194Z',
-    '2020-07-11T23:36:17.929Z',
-    '2020-07-12T10:51:36.790Z',
+    '2022-09-21T17:01:17.194Z',
+    '2022-09-26T23:36:17.929Z',
+    '2022-09-27T10:51:36.790Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT', // de-DE
@@ -88,17 +88,41 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // FUNCTIONS
-const displayMovements = (movements, sort) => {
+
+const formatDate = date => {
+  const calcPassedDays = (date1, date2) =>
+    Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+  const now = new Date();
+  const days = calcPassedDays(now, date);
+
+  if (days === 0) return 'Today';
+  else if (days === 1) return 'Yesterday';
+  else if (days < 7) return `${days} days ago`;
+  else if (days >= 7 && days < 14) return `a week ago`;
+  else {
+    const day = date.getDate().toString().padStart(2, 0);
+    const month = (date.getMonth() + 1).toString().padStart(2, 0);
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+};
+
+const displayMovements = (acc, sort) => {
   containerMovements.innerHTML = '';
-  const mov = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  const mov = sort
+    ? acc.movements.slice().sort((a, b) => a - b)
+    : acc.movements;
   mov?.forEach((mov, i) => {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
+    const date = new Date(acc.movementsDates[i]);
+    const displayDate = formatDate(date);
     const html = `
         <div class="movements__row">
           <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-          <div class="movements__value">${mov.toFixed(2)}€</div>
+          <div class="movements__date">${displayDate}</div>
+          <div class="movements__value">${(+mov).toFixed(2)}€</div>
         </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -143,7 +167,7 @@ const calcDisplayBalance = acc => {
 
 const updateUI = acc => {
   // Display Movements
-  displayMovements(acc.movements);
+  displayMovements(acc);
   // Display Balance
   calcDisplayBalance(acc);
   // Display Summary
@@ -166,6 +190,14 @@ btnLogin.addEventListener('click', e => {
     }!`;
     // Display UI
     containerApp.style.opacity = 100;
+    // get current date and time
+    const now = new Date();
+    const day = now.getDate().toString().padStart(2, 0);
+    const month = (now.getMonth() + 1).toString().padStart(2, 0);
+    const year = now.getFullYear();
+    const hour = now.getHours().toString().padStart(2, 0);
+    const mins = now.getMinutes().toString().padStart(2, 0);
+    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${mins}`;
     // Remove keyboard focus
     inputLoginPin.blur();
     // update information
@@ -195,6 +227,8 @@ btnTransfer.addEventListener('click', e => {
     // push new value to movement array
     currentAccount.movements.push(-amount);
     recieverAcc.movements.push(amount);
+    currentAccount.movementsDates.push(new Date().toISOString());
+    recieverAcc.movementsDates.push(new Date().toISOString());
     // update information
     updateUI(currentAccount);
   }
@@ -226,13 +260,14 @@ btnClose.addEventListener('click', e => {
 // ReuqestLoan EventHandler
 btnLoan.addEventListener('click', e => {
   e.preventDefault();
-  const amount = Math.floor(inputLoanAmount.value).toFixed(2);
+  const amount = Math.floor(inputLoanAmount.value);
   const isLoanConfirmed = currentAccount.movements.some(
     mov => mov >= amount * 0.1
   );
 
   if (isLoanConfirmed && amount > 0) {
     currentAccount.movements.push(amount);
+    currentAccount.movementsDates.push(new Date().toISOString());
     updateUI(currentAccount);
   }
   inputLoanAmount.value = '';
@@ -242,7 +277,7 @@ btnLoan.addEventListener('click', e => {
 let sorted = false;
 btnSort.addEventListener('click', e => {
   e.preventDefault();
-  displayMovements(currentAccount.movements, !sorted);
+  displayMovements(currentAccount, !sorted);
   sorted = !sorted;
 });
 
@@ -437,3 +472,26 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 // console.log(shallowDogs);
 
 //**********************SECTION_12****************************/
+
+//create date
+// const now = new Date();
+// console.log(now);
+// console.log(new Date('Sep 28 2022 12:31:42'));
+// console.log(new Date('Oct 21, 1995'));
+// console.log(new Date(account1.movementsDates[0]));
+// console.log(new Date(2037, 9));
+
+// console.log(now.getDate());
+// console.log(now.getMonth());
+// console.log(now.getDay());
+// console.log(now.getFullYear());
+// console.log(now.getHours());
+// console.log(now.getMinutes());
+// console.log(now.getSeconds());
+// console.log(now.toISOString());
+// console.log(now.getTime());
+// console.log(new Date(now.getTime()));
+// console.log(new Date(Date.now()));
+
+// console.log(now.toLocaleDateString());
+// console.log(`${now.getHours()}:${now.getMinutes()}`);
