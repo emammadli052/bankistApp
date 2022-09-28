@@ -98,7 +98,7 @@ const displayMovements = (movements, sort) => {
           <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-          <div class="movements__value">${mov}€</div>
+          <div class="movements__value">${mov.toFixed(2)}€</div>
         </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -119,8 +119,8 @@ const calclDisplaySummary = account => {
       return interest >= 1; // take interests greater than 1
     })
     .reduce((acc, int) => acc + int, 0);
-  labelSumIn.textContent = `${income}€`;
-  labelSumOut.textContent = `${Math.abs(out)}€`;
+  labelSumIn.textContent = `${income.toFixed(2)}€`;
+  labelSumOut.textContent = `${Math.abs(out).toFixed(2)}€`;
   labelSumInterest.textContent = `${interest.toFixed(2)}€`;
 };
 
@@ -138,7 +138,7 @@ createUserNames(accounts);
 const calcDisplayBalance = acc => {
   const balance = acc.movements.reduce((acc, curr) => acc + curr, 0);
   acc.balance = balance;
-  labelBalance.textContent = `${balance} EUR`;
+  labelBalance.textContent = `${balance.toFixed(2)} EUR`;
 };
 
 const updateUI = acc => {
@@ -159,7 +159,7 @@ btnLogin.addEventListener('click', e => {
     acc => acc.username === inputLoginUsername.value
   );
   // optional chaining '?.'
-  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+  if (currentAccount?.pin === +inputLoginPin.value) {
     // Display Message
     labelWelcome.textContent = `Welcome, ${
       currentAccount.owner.split(' ')[0]
@@ -184,7 +184,7 @@ btnTransfer.addEventListener('click', e => {
   const recieverAcc = accounts.find(
     acc => acc.username === inputTransferTo.value
   );
-  const amount = Number(inputTransferAmount.value);
+  const amount = +inputTransferAmount.value;
   // check if such account exist
   if (
     recieverAcc?.username &&
@@ -213,7 +213,7 @@ btnClose.addEventListener('click', e => {
   );
   if (
     currentAccount.username === inputCloseUsername.value &&
-    currentAccount.pin === Number(inputClosePin.value)
+    currentAccount.pin === +inputClosePin.value
   ) {
     accounts.splice(index, 1);
     containerApp.style.opacity = 0;
@@ -226,7 +226,7 @@ btnClose.addEventListener('click', e => {
 // ReuqestLoan EventHandler
 btnLoan.addEventListener('click', e => {
   e.preventDefault();
-  const amount = Number(inputLoanAmount.value);
+  const amount = Math.floor(inputLoanAmount.value).toFixed(2);
   const isLoanConfirmed = currentAccount.movements.some(
     mov => mov >= amount * 0.1
   );
@@ -259,7 +259,6 @@ const currencies = new Map([
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
-movements.at();
 /////////////////////////////////////////////////
 /** Array Methods
  * slice
@@ -436,3 +435,5 @@ movements.at();
 // const shallowDogs = dogs.slice();
 // shallowDogs.sort((a, b) => a.recommendedFood - b.recommendedFood);
 // console.log(shallowDogs);
+
+//**********************SECTION_12****************************/
